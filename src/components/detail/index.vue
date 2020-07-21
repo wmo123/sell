@@ -20,11 +20,23 @@
               v-for="item in data.supports"
               :key="item.type"
             >
-              <img class="discount-image" :class="classMap[item.type]" /><span class="description">{{ item.description }}</span>
+              <img class="discount-image" :class="classMap[item.type]" /><span
+                class="description"
+                >{{ item.description }}</span
+              >
             </div>
           </div>
         </div>
-        <div class="seller-note"></div>
+        <div class="seller-note">
+          <div class="title">
+            <span class="line"></span>
+            <span class="text">商家公告</span>
+            <span class="line"></span>
+          </div>
+          <div class="note">
+            {{ data.bulletin }}
+          </div>
+        </div>
       </div>
     </div>
     <div class="close">
@@ -69,7 +81,7 @@ export default {
         font-weight 700
         text-align center
         line-height 16px
-      .discount-info
+      .discount-info,.seller-note
         .title
           font-size 0
           padding 0
@@ -112,13 +124,22 @@ export default {
               &.special
                 bg-image('special_2')
             .description
-              line-height: 16px
+              line-height: 12px
               font-size: 12px
               vertical-align: top
+              font-weight 200
+      .seller-note
+        .note
+          padding 0 48px
+          font-size 12px
+          font-weight 200
+          line-height 24px
 
   .close
     height 64px
     line-height 64px
     margin-top -64px
     text-align center
+    font-size 32px
+    color rgba(255,255,255,.5)
 </style>
