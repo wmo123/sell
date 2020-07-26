@@ -27,7 +27,6 @@ export default {
   },
   computed: {
     starClasses: function() {
-      console.log(this.score);
       let result = [];
       // <0.5 不计数 大于0.5记半星
       let score = Math.floor(this.score * 2) / 2;
@@ -45,7 +44,6 @@ export default {
       return result;
     },
     starType: function() {
-      console.log(this.size);
       return "star_" + this.size;
     }
   },
@@ -53,7 +51,6 @@ export default {
     return {};
   },
   mounted() {
-    console.log(this.starType);
   }
 };
 </script>

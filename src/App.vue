@@ -25,7 +25,6 @@ export default {
   },
   created() {
     this.$http.get('/api/sellers').then(response => {
-      console.log(response);
       response = response.body;
       if (response.errno === ERR_NO) {
         this.sellers = response.data;
