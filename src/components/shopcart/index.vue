@@ -15,8 +15,8 @@
       >
       <span class="text">另需配送费{{ sellers.deliveryPrice }}元</span>
     </div>
-    <div class="cart-rg" :class="{ 'highLight': totalPrice >= sellers.minPrice }">
-      <span v-show="(totalPrice = 0)">¥{{ sellers.minPrice }}元起送</span>
+    <div class="cart-rg" :class="{ highLight: totalPrice >= sellers.minPrice }">
+      <span v-show="totalPrice === 0">¥{{ sellers.minPrice }}元起送</span>
       <span v-show="totalPrice > 0 && totalPrice < sellers.minPrice"
         >还差¥{{ sellers.minPrice - totalPrice }}元起送</span
       >
@@ -35,16 +35,21 @@ export default {
     selectFoods: {
       type: Array,
       default: () => {
-        return [
-          {
-            price: 10,
-            count: 3
-          }
-        ];
+        return [];
       }
     }
   },
   computed: {
+    // totalPrice: {
+    //   get: function() {
+    //     let total = 0;
+    //     this.selectFoods.forEach(food => {
+    //       total += food.price * food.count;
+    //     });
+    //     return total;
+    //   },
+    //   set: function() {}
+    // },
     totalPrice() {
       let total = 0;
       this.selectFoods.forEach(food => {
@@ -126,6 +131,7 @@ export default {
       font-weight 700
       padding-right 12px
       border-right 1px solid rgba(255,255,255,0.1)
+      letter-spacing: 2px;
       &.highLight
         color #fff
     .text
@@ -145,6 +151,7 @@ export default {
     font-size: 12px;
     span
       font-weight: 700;
+      letter-spacing: 0.5px;
     &.highLight
       background #00b43c
       span

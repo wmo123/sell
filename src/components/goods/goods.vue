@@ -48,22 +48,24 @@
                   ><i class="symbol">¥</i>{{ food.oldPrice }}</span
                 >
               </div>
+              <cartcontrol :food="food"></cartcontrol>
             </div>
           </div>
         </li>
       </ul>
     </div>
-    <shopcart :sellers="sellers"></shopcart>
+    <shopcart :sellers="sellers" :selectFoods="selectItems"></shopcart>
   </div>
 </template>
 <script>
 import BScroll from "@better-scroll/core";
 import Shopcart from "../shopcart";
+import Cartcontrol from "../cartcontrol";
 const ERR_OK = 0;
 const classMap = ["decrease", "discount", "special", "invoice", "guarantee"];
 export default {
   name: "goods",
-  components: { Shopcart },
+  components: { Shopcart, Cartcontrol },
   props: {
     sellers: {
       type: Object,
@@ -80,6 +82,17 @@ export default {
         }
       }
       return 0;
+    },
+    selectItems() {
+      let data = [];
+      this.goods.forEach(good => {
+        good.foods.forEach(food => {
+          if (food.count) {
+            data.push(food);
+          }
+        });
+      });
+      return data;
     }
   },
   data() {
@@ -93,7 +106,10 @@ export default {
   methods: {
     _initScroll() {
       this.menuScroll = new BScroll(this.$refs.menuWrapper, { click: true });
-      this.goodScroll = new BScroll(this.$refs.goodsWrapper, { probeType: 3 });
+      this.goodScroll = new BScroll(this.$refs.goodsWrapper, {
+        probeType: 3,
+        click: true
+      });
       this.goodScroll.on("scroll", ({ x, y }) => {
         // 向上滚动y值为负;向下滚动y值为正,
         this.posY = Math.abs(y);
@@ -108,6 +124,23 @@ export default {
       let ele = doms[index];
       this.goodScroll.scrollToElement(ele, 300);
     }
+    // 加入购物车
+    // addCart(food) {
+    //   let count = 1;
+    //   if (food.count) {
+    //     count += 1;
+    //   }
+    //   this.goods = this.goods.map(item => {
+    //     this.$set(item, "count", count);
+    //     if (item.name === food.name) {
+    //       return food;
+    //     } else {
+    //       return item;
+    //     }
+    //   });
+    //   this.selectFoods.push(food);
+    //   console.log(food);
+    // }
   },
 
   created() {
