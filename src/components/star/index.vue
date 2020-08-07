@@ -77,7 +77,7 @@ export default {
         bg-image('star48_half')
       &.off
         bg-image('star48_off')
-  &.star-36
+  &.star_36
     .star-item
       display inline-block
       background-repeat no-repeat
@@ -93,8 +93,8 @@ export default {
         bg-image('star36_half')
       &.off
         bg-image('star36_off')
-  &.star-24
-      .star-item
+  &.star_24
+    .star-item
       display inline-block
       background-repeat no-repeat
       width: 15px
