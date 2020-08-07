@@ -54,7 +54,36 @@
         </li>
       </ul>
     </div>
-    <shopcart :sellers="sellers" :selectFoods="selectItems"></shopcart>
+    <shopcart
+      :sellers="sellers"
+      :selectFoods="selectItems"
+      @showcart="showCartEvent"
+      @settle-account="settleAccountEvent"
+    ></shopcart>
+    <transition name="fade">
+      <div class="cart-mask" v-show="fold" @click="showCartEvent"></div>
+    </transition>
+    <transition name="move">
+      <div class="cart" v-show="fold">
+        <div class="title">
+          <span class="text">购物车</span>
+          <span class="clear" @click="clearCart">清空</span>
+        </div>
+        <div class="list-content" ref="list-wrapper">
+          <ul>
+            <li
+              class="food-item"
+              v-for="(selectFood, index) in selectItems"
+              :key="index"
+            >
+              <span class="name">{{ selectFood.name }}</span>
+              <span class="price">¥{{ selectFood.price }}</span>
+              <cartcontrol :food="selectFood"></cartcontrol>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 <script>
@@ -93,6 +122,20 @@ export default {
         });
       });
       return data;
+    },
+    fold() {
+      return this.selectItems.length && this.show;
+    }
+  },
+  watch: {
+    // 监控选中的美食,( selectItems=[] , show=false )
+    selectItems: {
+      handler: function (val, oldval) {
+        if (!val.length) {
+          this.show = false;
+        };
+      },
+      deep: true
     }
   },
   data() {
@@ -100,7 +143,8 @@ export default {
       classMap: classMap,
       goods: [],
       scrollY: [],
-      posY: 0
+      posY: 0,
+      show: false // 操作行为引起购物车显隐的标示
     };
   },
   methods: {
@@ -123,26 +167,34 @@ export default {
       let doms = this.$refs.goodsWrapper.querySelectorAll(".good-item");
       let ele = doms[index];
       this.goodScroll.scrollToElement(ele, 300);
+    },
+    showCartEvent() {
+      this.show = !this.show;
+      if (this.fold) {
+        this.$nextTick(() => {
+          if (!this.listContentScroll) {
+            let ele = this.$refs["list-wrapper"];
+            this.listContentScroll = new BScroll(ele, { click: true });
+          }
+        });
+      } else if (this.listContentScroll) {
+        this.listContentScroll.refresh();
+      }
+    },
+    clearCart() {
+      this.show = false;
+      this.selectItems.map(item => {
+        item.count = 0;
+      });
+    },
+    settleAccountEvent() {
+      let totalPrice = 0;
+      this.selectItems.map(item => {
+        totalPrice += item.count * item.price;
+      });
+      alert(`需支付${totalPrice}元`);
     }
-    // 加入购物车
-    // addCart(food) {
-    //   let count = 1;
-    //   if (food.count) {
-    //     count += 1;
-    //   }
-    //   this.goods = this.goods.map(item => {
-    //     this.$set(item, "count", count);
-    //     if (item.name === food.name) {
-    //       return food;
-    //     } else {
-    //       return item;
-    //     }
-    //   });
-    //   this.selectFoods.push(food);
-    //   console.log(food);
-    // }
   },
-
   created() {
     this.$http.get("/api/goods").then(response => {
       response = response.body;
@@ -281,4 +333,70 @@ export default {
                 margin-right 2px
       .food0
         padding-bottom 0
+  .cart
+    width 100%
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    padding-bottom: 44px;
+    z-index: 1;
+    min-height: 50px;
+    background #f3f5f7
+    .title
+      width 100%
+      height: 40px
+      line-height 40px
+      border-1px(rgba(7,17,27,0.1))
+      .text
+        font-size 14px
+        line-height 40px
+        color rgb(7,17,27)
+        padding-left: 18px;
+      .clear
+        font-size 14px
+        line-height 40px
+        color rgb(0,160,260)
+        float: right;
+        margin-right: 18px;
+    .list-content
+      max-height 217px
+      padding 0 18px
+      background #fff
+      overflow hidden
+      .food-item
+        padding 12px 0
+        position relative
+        border-1px(rgba(7,17,27,.1))
+        .name
+          line-height: 24px;
+          font-size: 14px;
+          color: #07111b;
+        .price
+          line-height: 24px;
+          font-size: 14px;
+          font-weight: normal;
+          color: #f01414;
+          position absolute
+          top 12px
+          right 80px
+        .cartcontrol
+          bottom 5px
+  .cart-mask
+    position fixed
+    left 0
+    top 0
+    width 100%
+    height 100%
+    background rgba(7,17,27,0.6)
+    backdrop-filter: blur(10px)
+  .fade-enter-active, .fade-leave-active
+    transition: opacity .5s
+  .fade-enter, .fade-leave-to
+    opacity: 0;
+  .move-enter-active, .move-leave-active
+    transition: all .5s
+  .move-enter, .move-leave-to
+    transform: translate3d(0, 100%, 0);
+  .move-leave, .move-enter-to
+    transform: translate3d(0, 0, 0);
 </style>

@@ -1,6 +1,6 @@
 <template>
-  <div class="shopcart">
-    <div class="cart-lf">
+  <div class="shopcart" >
+    <div class="cart-lf" @click="$emit('showcart')">
       <div class="icon-wrapper">
         <div class="icon" :class="{ highLight: totalCount > 0 }">
           <i
@@ -20,13 +20,51 @@
       <span v-show="totalPrice > 0 && totalPrice < sellers.minPrice"
         >还差¥{{ sellers.minPrice - totalPrice }}元起送</span
       >
-      <span v-show="totalPrice >= sellers.minPrice">去结算</span>
+      <span v-show="totalPrice >= sellers.minPrice" @click="$emit('settle-account')">去结算</span>
+    </div>
+    <!-- 先在此处准备好下落的区域及小球 -->
+    <div class="ball-container">
+      <transition
+        name="drop"
+        v-on:before-enter="beforeEnter"
+        v-on:enter="enter"
+        v-on:after-enter="afterEnter"
+        v-for="(ball, index) in balls"
+        :key="index"
+      >
+        <div class="ball" v-show="ball.show">
+          <div class="inner inner-hook"></div>
+        </div>
+      </transition>
     </div>
   </div>
 </template>
 <script>
+import eventBus from "../../common/js/bus";
 export default {
   name: "shopcart",
+  data() {
+    return {
+      balls: [
+        {
+          show: false
+        },
+        {
+          show: false
+        },
+        {
+          show: false
+        },
+        {
+          show: false
+        },
+        {
+          show: false
+        }
+      ],
+      dropBalls: []
+    };
+  },
   props: {
     sellers: {
       type: Object,
@@ -40,16 +78,6 @@ export default {
     }
   },
   computed: {
-    // totalPrice: {
-    //   get: function() {
-    //     let total = 0;
-    //     this.selectFoods.forEach(food => {
-    //       total += food.price * food.count;
-    //     });
-    //     return total;
-    //   },
-    //   set: function() {}
-    // },
     totalPrice() {
       let total = 0;
       this.selectFoods.forEach(food => {
@@ -65,8 +93,56 @@ export default {
       return num;
     }
   },
-  data() {
-    return {};
+  mounted() {
+    this.drop();
+  },
+  methods: {
+    drop() {
+      eventBus.$on("drop", el => {
+        this.balls.forEach(ball => {
+          if (!ball.show) {
+            ball.el = el;
+            ball.show = true;
+          }
+          this.dropBalls.push(ball);
+        });
+      });
+    },
+    beforeEnter(el) {
+      let count = this.balls.length;
+      while (count--) {
+        let ball = this.balls[count];
+        if (ball.show) {
+          let rect = ball.el.getBoundingClientRect();
+          let x = rect.left - 32;
+          let y = -(window.innerHeight - rect.top - 22);
+          el.style.display = "";
+          el.style.webkitTransform = `translate3d(0,${y}px,0)`;
+          el.style.transform = `translate3d(0,${y}px,0)`;
+          let inner = el.getElementsByClassName("inner-hook")[0];
+          inner.style.webkitTransform = `translate3d(${x}px,0,0)`;
+          inner.style.transform = `translate3d(${x}px,0,0)`;
+        }
+      }
+    },
+    enter(el) {
+      /* eslint-disable no-unused-vars */
+      let rf = el.offsetHeight;
+      this.$nextTick(() => {
+        el.style.webkitTransform = "translate3d(0,0,0)";
+        el.style.transform = "translate3d(0,0,0)";
+        let inner = el.getElementsByClassName("inner-hook")[0];
+        inner.style.webkitTransform = "translate3d(0,0,0)";
+        inner.style.transform = "translate3d(0,0,0)";
+      });
+    },
+    afterEnter(el) {
+      let ball = this.dropBalls.shift();
+      if (ball) {
+        ball.show = false;
+        el.style.display = "none";
+      }
+    }
   }
 };
 </script>
@@ -81,6 +157,7 @@ export default {
   height 44px
   background #141d27
   color rgba(255,255,255,0.4)
+  z-index 2
   .cart-lf
     flex 1
     width 100%
@@ -156,4 +233,19 @@ export default {
       background #00b43c
       span
         color: #fff
+  .ball-container
+    .ball
+      position: fixed
+      left: 32px
+      bottom: 22px
+      z-index: 200
+      .inner
+        width: 16px
+        height: 16px
+        border-radius: 50%
+        background: rgb(0, 160, 220)
+    .drop-enter-active
+      transition: all .4s cubic-bezier(0.49, -0.29, 0.75, 0.41)
+      .inner
+        transition: all .4s linear
 </style>

@@ -10,6 +10,7 @@
   </div>
 </template>
 <script>
+import eventBus from "../../common/js/bus";
 export default {
   name: "cartcontrol",
   props: {
@@ -30,12 +31,13 @@ export default {
         this.$set(this.food, "count", 1);
       } else {
         this.food.count++;
-      }
+      };
+      eventBus.$emit("drop", e.target);
     },
-    decreaseCart() {
+    decreaseCart(e) {
       if (this.food.count) {
         this.food.count--;
-      }
+      };
     }
   },
   created() {}
