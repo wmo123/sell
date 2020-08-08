@@ -6,12 +6,36 @@
     </div>
     <div class="split"></div>
     <div class="ratings-filter">
-      <div class="rating-type"></div>
-      <div class="switch"></div>
+      <div class="rating-type">
+        <div
+          @click="active = type.type"
+          class="type"
+          v-for="(type, index) in ratingType"
+          :key="index"
+          :class="classObj(type.type)"
+        >
+          <span v-show="type.type === 0">全部</span>
+          <span v-show="type.type === 1">满意</span>
+          <span v-show="type.type === 2">不满意</span>
+          {{ type.count }}
+        </div>
+      </div>
+      <div class="switch">
+        <span
+          :class="switchClass"
+          class="icon-check_circle"
+          @click="check = !check"
+        ></span>
+        <span class="text">只看有内容的评价</span>
+      </div>
     </div>
     <div class="ratings-wrapper" ref="ratings">
       <ul>
-        <li v-for="(item, index) in ratings" :key="index" class="item-wrapper">
+        <li
+          v-for="(item, index) in ratingsTypeData"
+          :key="index"
+          class="item-wrapper"
+        >
           <div class="item-content">
             <div class="avater">
               <img :src="item.avatar" width="28" height="28" />
@@ -52,17 +76,95 @@
   </div>
 </template>
 <script>
-import BScroll from "better-scroll";
+// import BScroll from "better-scroll";
 import Star from "../star";
 export default {
   name: "ratings",
   components: { Star },
   data() {
     return {
-      ratings: []
+      ratings: [],
+      active: 0,
+      ratingsTypeData: [],
+      check: false
     };
   },
-  computed: {},
+  computed: {
+    ratingType: function() {
+      let all = this.ratings.length;
+      let satisfied = 0;
+      let unsatisfied = 0;
+      this.ratings.forEach(item => {
+        if (item.score >= 3) {
+          satisfied += 1;
+        } else {
+          unsatisfied += 1;
+        }
+      });
+      return [
+        { count: all, type: 0 },
+        { count: satisfied, type: 1 },
+        { count: unsatisfied, type: 2 }
+      ];
+    },
+    classObj: function() {
+      return function(type) {
+        if (type === 2) {
+          return type === this.active ? "active-unsatisfied " : "unsatidfied";
+        } else {
+          return type === this.active ? "active" : "";
+        }
+      };
+    },
+    switchClass: function() {
+      return this.check ? "check" : "";
+    }
+  },
+  watch: {
+    check: function(val, oldVal) {
+      if (val) {
+        const active = this.active;
+        if (active === 0) {
+          this.ratingsTypeData = this.ratings.filter(item => {
+            return item.text;
+          });
+        }
+        if (active === 1) {
+          this.ratingsTypeData = this.ratings.filter(item => {
+            return item.text && item.score >= 3;
+          });
+        }
+        if (active === 2) {
+          this.ratingsTypeData = this.ratings.filter(item => {
+            return item.text && item.score < 3;
+          });
+        }
+      } else {
+        this.switchRating();
+      }
+    },
+    active: function(val, oldVal) {
+      if (this.check) {
+        if (val === 0) {
+          this.ratingsTypeData = this.ratings.filter(item => {
+            return item.text;
+          });
+        }
+        if (val === 1) {
+          this.ratingsTypeData = this.ratings.filter(item => {
+            return item.text && item.score >= 3;
+          });
+        }
+        if (val === 2) {
+          this.ratingsTypeData = this.ratings.filter(item => {
+            return item.text && item.score < 3;
+          });
+        }
+      } else {
+        this.switchRating();
+      }
+    }
+  },
   methods: {
     transDate(time) {
       let year = time.getFullYear();
@@ -73,11 +175,28 @@ export default {
       let lastIdx = tempStr.lastIndexOf(":") + 3;
       let detailTime = tempStr.slice(firidx, lastIdx);
       return `${year}-${month}-${day} ${detailTime}`;
+    },
+    switchRating() {
+      let active = this.active;
+      if (active === 0) {
+        this.ratingsTypeData = this.ratings;
+        return;
+      }
+      if (active === 1) {
+        this.ratingsTypeData = this.ratings.filter(item => {
+          return item.score >= 3;
+        });
+      } else {
+        this.ratingsTypeData = this.ratings.filter(item => {
+          return item.score < 3;
+        });
+      }
     }
   },
   created() {
     this.$http.get("/api/ratings").then(response => {
       this.ratings = response.body.data;
+      this.ratingsTypeData = response.body.data;
     });
     // const ele = this.$refs.ratings;
     // this.scroll = new BScroll(ele);
@@ -106,9 +225,41 @@ export default {
         padding 18px 0
         margin 0 18px
         border-1px(rgba(7,17,27,0.1))
+        .type
+          display: inline-block;
+          padding: 8px 12px;
+          margin-right: 8px;
+          line-height: 16px;
+          border-radius: 1px;
+          font-size: 12px;
+          color: #4d555d;
+          background rgba(0,160,220,0.2)
+        .active
+          background #00a0dc
+          color #fff
+        .unsatidfied
+          background rgba(77,85,93,0.2)
+        .active-unsatisfied
+          background #4d555d
+          color #fff
       .switch
         padding 18px
         border-bottom 1px solid rgba(7,17,27,0.1)
+        color #93999f
+        font-size 0
+        line-height 24px
+        .icon-check_circle
+          display inline-block
+          font-size 24px
+          margin-right 4px
+          vertical-align top
+        .check
+          color #00c850
+        .text
+          display inline-block
+          color #93999f
+          font-size 12px
+          vertical-align top
     .ratings-wrapper
       height 100%
       overflow hidden
