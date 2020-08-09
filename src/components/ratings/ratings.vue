@@ -1,82 +1,84 @@
 <template>
-  <div class="ratings-content">
-    <div class="overview">
-      <div class="overview-lf"></div>
-      <div class="overview-rg"></div>
-    </div>
-    <div class="split"></div>
-    <div class="ratings-filter">
-      <div class="rating-type">
-        <div
-          @click="active = type.type"
-          class="type"
-          v-for="(type, index) in ratingType"
-          :key="index"
-          :class="classObj(type.type)"
-        >
-          <span v-show="type.type === 0">全部</span>
-          <span v-show="type.type === 1">满意</span>
-          <span v-show="type.type === 2">不满意</span>
-          {{ type.count }}
+  <div class="scroll-warpper" ref="wrapper">
+    <div class="ratings-content">
+      <div class="overview">
+        <div class="overview-lf"></div>
+        <div class="overview-rg"></div>
+      </div>
+      <div class="split"></div>
+      <div class="ratings-filter">
+        <div class="rating-type">
+          <div
+            @click="active = type.type"
+            class="type"
+            v-for="(type, index) in ratingType"
+            :key="index"
+            :class="classObj(type.type)"
+          >
+            <span v-show="type.type === 0">全部</span>
+            <span v-show="type.type === 1">满意</span>
+            <span v-show="type.type === 2">不满意</span>
+            {{ type.count }}
+          </div>
+        </div>
+        <div class="switch">
+          <span
+            :class="switchClass"
+            class="icon-check_circle"
+            @click="check = !check"
+          ></span>
+          <span class="text">只看有内容的评价</span>
         </div>
       </div>
-      <div class="switch">
-        <span
-          :class="switchClass"
-          class="icon-check_circle"
-          @click="check = !check"
-        ></span>
-        <span class="text">只看有内容的评价</span>
+      <div class="ratings-wrapper" ref="ratings">
+        <ul>
+          <li
+            v-for="(item, index) in ratingsTypeData"
+            :key="index"
+            class="item-wrapper"
+          >
+            <div class="item-content">
+              <div class="avater">
+                <img :src="item.avatar" width="28" height="28" />
+              </div>
+              <div class="info">
+                <p class="base">
+                  <span class="name">{{ item.username }}</span>
+                  <span class="time">{{
+                    transDate(new Date(item.rateTime))
+                  }}</span>
+                </p>
+                <p class="score">
+                  <Star :size="24" :score="item.score"></Star>
+                  <span class="delivery-time" v-if="item.deliveryTime"
+                    >{{ item.deliveryTime }}分钟送达</span
+                  >
+                </p>
+                <p class="text">{{ item.text }}</p>
+                <p class="recommend">
+                  <span
+                    v-if="item.recommend.length"
+                    :class="
+                      item.rateType === 0 ? 'icon-thumb_up' : 'icon-thumb_down'
+                    "
+                  ></span>
+                  <span
+                    class="text"
+                    v-for="(rating, index) in item.recommend"
+                    :key="index"
+                    >{{ rating }}</span
+                  >
+                </p>
+              </div>
+            </div>
+          </li>
+        </ul>
       </div>
-    </div>
-    <div class="ratings-wrapper" ref="ratings">
-      <ul>
-        <li
-          v-for="(item, index) in ratingsTypeData"
-          :key="index"
-          class="item-wrapper"
-        >
-          <div class="item-content">
-            <div class="avater">
-              <img :src="item.avatar" width="28" height="28" />
-            </div>
-            <div class="info">
-              <p class="base">
-                <span class="name">{{ item.username }}</span>
-                <span class="time">{{
-                  transDate(new Date(item.rateTime))
-                }}</span>
-              </p>
-              <p class="score">
-                <Star :size="24" :score="item.score"></Star>
-                <span class="delivery-time" v-if="item.deliveryTime"
-                  >{{ item.deliveryTime }}分钟送达</span
-                >
-              </p>
-              <p class="text">{{ item.text }}</p>
-              <p class="recommend">
-                <span
-                  v-if="item.recommend.length"
-                  :class="
-                    item.rateType === 0 ? 'icon-thumb_up' : 'icon-thumb_down'
-                  "
-                ></span>
-                <span
-                  class="text"
-                  v-for="(rating, index) in item.recommend"
-                  :key="index"
-                  >{{ rating }}</span
-                >
-              </p>
-            </div>
-          </div>
-        </li>
-      </ul>
     </div>
   </div>
 </template>
 <script>
-// import BScroll from "better-scroll";
+import BScroll from "@better-scroll/core";
 import Star from "../star";
 export default {
   name: "ratings",
@@ -142,6 +144,7 @@ export default {
       } else {
         this.switchRating();
       }
+      this.scroll.refresh();
     },
     active: function(val, oldVal) {
       if (this.check) {
@@ -163,6 +166,7 @@ export default {
       } else {
         this.switchRating();
       }
+      this.scroll.refresh();
     }
   },
   methods: {
@@ -197,14 +201,23 @@ export default {
     this.$http.get("/api/ratings").then(response => {
       this.ratings = response.body.data;
       this.ratingsTypeData = response.body.data;
+      // 获取到数据,dom重新渲染,content的高度大于wrapper的高度,才能发生滚动
+      this.$nextTick(() => {
+        const ele = this.$refs.wrapper;
+        this.scroll = new BScroll(ele, { click: true });
+      });
     });
-    // const ele = this.$refs.ratings;
-    // this.scroll = new BScroll(ele);
   }
 };
 </script>
 <style lang="stylus">
 @import '../../common/stylus/mixin.styl';
+  .scroll-warpper
+    width 100%
+    position absolute
+    top 183px
+    bottom 0
+    overflow hidden
   .ratings-content
     .overview
       display flex
