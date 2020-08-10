@@ -2,8 +2,27 @@
   <div class="scroll-warpper" ref="wrapper">
     <div class="ratings-content">
       <div class="overview">
-        <div class="overview-lf"></div>
-        <div class="overview-rg"></div>
+        <div class="overview-lf">
+          <span class="score">4.2</span>
+          <span class="title">综合评分</span>
+          <span class="rank">高于周边商家69.2%</span>
+        </div>
+        <div class="overview-rg">
+          <div class="attitude">
+            <span class="text">服务态度</span>
+            <Star :size="36" :score="4.2"></Star>
+            <span class="number">4.2</span>
+          </div>
+          <div class="score">
+            <span class="text">商品评分</span>
+            <Star :size="36" :score="4.1"></Star>
+            <span class="number">4.1</span>
+          </div>
+          <div class="delivery-time">
+            <span class="text">送达时间</span>
+            <span class="time">38分钟</span>
+          </div>
+        </div>
       </div>
       <div class="split"></div>
       <div class="ratings-filter">
@@ -223,10 +242,56 @@ export default {
       display flex
       padding 18px 0
       .overview-lf
-        flex 0 0 187px
+        flex 0 0 137px
+        margin 0 auto
+        border-right 1px solid rgba(7,17,27,0.1)
+        span
+          display block
+          text-align center
+        .score
+          margin-bottom 6px
+          line-height 28px
+          font-size 24px
+          color #f90
+        .title
+          margin-bottom 8px
+          line-height 12px
+          font-size 12px
+          color #07111b
+        .rank
+          font-size 10px
+          color #93999f
       .overview-rg
         flex 0 0 287px
-        padding 0 24px
+        padding 5px 24px
+        margin 0 auto
+        .star
+          display inline-block
+          margin 0
+          vertical-align middle
+          margin -2px 12px 0
+        .attitude,.score
+          font-size 0px
+          .text
+            font-size 12px
+            display inline-block
+            vertical-align middle
+            color #07111b
+            line-height: 18px
+          .number
+            line-height: 18px
+            font-size 12px
+            display inline-block
+            color #f90
+            vertical-align middle
+        .score
+          margin 8px 0
+        .delivery-time
+          font-size 12px
+          line-height 18px
+          .time
+            margin-left 12px
+            color rgb(147,153,159)
     .split
       width 100%
       height 16px

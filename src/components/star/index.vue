@@ -69,6 +69,7 @@ export default {
       height: 20px
       margin-right: 22px
       background-size: 20px 20px
+      vertical-align middle
       &:last-child
         margin-right: 0
       &.on
@@ -85,6 +86,7 @@ export default {
       height: 15px
       margin-right: 6px
       background-size: 15px 15px
+      vertical-align middle
       &:last-child
         margin-right: 0
       &.on
@@ -101,6 +103,7 @@ export default {
       height: 15px
       margin-right: 6px
       background-size: 15px 15px
+      vertical-align middle
       &:last-child
         margin-right: 0
       &.on
