@@ -40,7 +40,7 @@
       </div>
     </div>
     <div class="close">
-      <i class="icon-close" @click="$emit('closeDetail')"></i>
+      <i class="icon-close" @click="$emit('close-detail')"></i>
     </div>
   </div>
 </template>

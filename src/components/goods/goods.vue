@@ -29,6 +29,7 @@
             :class="`food${index}`"
             v-for="(food, index) in good.foods"
             :key="index"
+            @click="toDetail(food)"
           >
             <div class="image">
               <img width="64px" height="64px" :src="food.image" />
@@ -84,17 +85,21 @@
         </div>
       </div>
     </transition>
+    <transition name="slide">
+      <GoodDetail v-if="showDetail" @back-to-list="backToList" :food="foodInfo"></GoodDetail>
+    </transition>
   </div>
 </template>
 <script>
 import BScroll from "@better-scroll/core";
 import Shopcart from "../shopcart";
 import Cartcontrol from "../cartcontrol";
+import GoodDetail from "../goodDetail";
 const ERR_OK = 0;
 const classMap = ["decrease", "discount", "special", "invoice", "guarantee"];
 export default {
   name: "goods",
-  components: { Shopcart, Cartcontrol },
+  components: { Shopcart, Cartcontrol, GoodDetail },
   props: {
     sellers: {
       type: Object,
@@ -130,10 +135,10 @@ export default {
   watch: {
     // 监控选中的美食,( selectItems=[] , show=false )
     selectItems: {
-      handler: function (val, oldval) {
+      handler: function(val, oldval) {
         if (!val.length) {
           this.show = false;
-        };
+        }
       },
       deep: true
     }
@@ -144,7 +149,9 @@ export default {
       goods: [],
       scrollY: [],
       posY: 0,
-      show: false // 操作行为引起购物车显隐的标示
+      show: false, // 操作行为引起购物车显隐的标示
+      showDetail: false, // 控制商品详情页的显隐
+      foodInfo: null // 商品详情
     };
   },
   methods: {
@@ -193,6 +200,13 @@ export default {
         totalPrice += item.count * item.price;
       });
       alert(`需支付${totalPrice}元`);
+    },
+    toDetail(food) {
+      this.foodInfo = food;
+      this.showDetail = true;
+    },
+    backToList() {
+      this.showDetail = false;
     }
   },
   created() {
@@ -398,5 +412,11 @@ export default {
   .move-enter, .move-leave-to
     transform: translate3d(0, 100%, 0);
   .move-leave, .move-enter-to
+    transform: translate3d(0, 0, 0);
+  .slide-enter-active, .slide-leave-active
+    transition: all .2s
+  .slide-enter, .slide-leave-to
+    transform: translate3d(100%, 0, 0);
+  .slide-leave, .slide-enter-to
     transform: translate3d(0, 0, 0);
 </style>

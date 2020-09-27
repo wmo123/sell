@@ -37,7 +37,7 @@
     <Detail
       v-show="detailShow"
       :data="sellers"
-      @closeDetail="closeDetail"
+      @close-detail="closeDetail"
     ></Detail>
   </div>
 </template>
